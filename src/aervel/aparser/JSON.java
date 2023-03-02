@@ -1,5 +1,7 @@
 package aervel.aparser;
 
+import aervel.aparser.json.Stringifier;
+
 public interface JSON {
 
     /**
@@ -9,7 +11,7 @@ public interface JSON {
      * @return A string with JSON representation of underlying object.
      */
     static String stringify(Object object) {
-        return null;
+        return Stringifier.stringify(object);
     }
 
 }
