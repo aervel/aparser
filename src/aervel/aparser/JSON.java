@@ -14,4 +14,7 @@ public interface JSON {
         return Stringifier.stringify(object);
     }
 
+    static <T> T parse(String json, Class<T> type) {
+        return null;
+    }
 }
