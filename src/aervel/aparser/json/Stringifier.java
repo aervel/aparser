@@ -9,7 +9,7 @@ import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
 import static java.util.Arrays.*;
 
-public abstract class Stringifier {
+public final class Stringifier {
 
     /**
      * Converts a Java object to its JSON representation and return it as String.
