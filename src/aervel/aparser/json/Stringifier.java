@@ -2,12 +2,12 @@ package aervel.aparser.json;
 
 import java.lang.reflect.Field;
 import java.time.temporal.Temporal;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.stream.Collectors;
+import java.util.Collection;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
+import static java.util.Arrays.*;
 
 public abstract class Stringifier {
 
@@ -32,7 +32,7 @@ public abstract class Stringifier {
 
         if (object instanceof Object[] array) {
             return "[%s]".formatted(
-                    Arrays.stream(array).map(Stringifier::stringify).collect(Collectors.joining(","))
+                    stream(array).map(Stringifier::stringify).collect(Collectors.joining(","))
             );
         }
 
@@ -46,17 +46,14 @@ public abstract class Stringifier {
          * The last return is for object represented with {} brackets in JSON. The return can be an empty JSON object
          * {}, but never a null object.
          */
-        return Arrays.stream(object.getClass().getDeclaredFields())
-                .filter(Stringifier::isValid)
+        return stream(object.getClass().getDeclaredFields()).filter(Stringifier::isValid)
                 .map(field -> {
                     try {
                         return "\"%s\":%s".formatted(field.getName(), stringify(field.get(object)));
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
-                })
-                .collect(Collectors.joining(","))
-                .formatted("{%s}");
+                }).collect(Collectors.joining(",")).formatted("{%s}");
     }
 
     /**
