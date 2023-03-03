@@ -21,6 +21,6 @@ final class Carriage implements Iterator<Character> {
 
     @Override
     public Character next() {
-        return chars[position++];
+        return chars[++position];
     }
 }
