@@ -27,4 +27,10 @@ final class Carriage implements Iterator<Character> {
     public Character next() {
         return chars[++position];
     }
+
+    public void clean() {
+        while ("\n\t\r ".contains(get().toString()) && hasNext()) {
+            next();
+        }
+    }
 }
