@@ -33,8 +33,8 @@ public class Parser {
 
         while (carriage.get() != ']') {
 
-            carriage.next(); // skip the semicolon (:) or bracket ([) characters
-            carriage.clean(); // skip all "\r\n\t " after semicolon or bracket
+            carriage.next(); // skip the : or [ characters
+            carriage.clean(); // skip all "\r\n\t " after : or [ characters
 
 
             if ("{[".contains(carriage.get().toString())) {
@@ -47,7 +47,7 @@ public class Parser {
 
         if (carriage.hasNext()) {
             carriage.next(); // skip ] character
-            carriage.clean(); // skip all "\r\n\t " after semicolon
+            carriage.clean(); // skip all "\r\n\t " ]
         }
 
         return list;
@@ -59,13 +59,13 @@ public class Parser {
         while (carriage.get() != '}') {
 
             if ("{,".contains(carriage.get().toString())) {
-                carriage.next(); // skip { or ,
+                carriage.next(); // skip { or , characters
             }
 
             String key = key();
 
-            carriage.next(); // skip the semicolon (:) character
-            carriage.clean(); // skip all "\r\n\t " after semicolon
+            carriage.next(); // skip the : character
+            carriage.clean(); // skip all "\r\n\t " after : character
 
             if ("{[".contains(carriage.get().toString())) {
                 map.put(key, parse());
@@ -76,7 +76,7 @@ public class Parser {
 
         if (carriage.hasNext()) {
             carriage.next(); // skip } character
-            carriage.clean(); // skip all "\r\n\t " after semicolon
+            carriage.clean(); // skip all "\r\n\t " characters
         }
 
         return map;
