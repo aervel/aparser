@@ -14,6 +14,10 @@ final class Carriage implements Iterator<Character> {
         return position;
     }
 
+    public Character get() {
+        return chars[position];
+    }
+
     @Override
     public boolean hasNext() {
         return position < chars.length - 1;
