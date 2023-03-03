@@ -29,7 +29,27 @@ public class Parser {
     private Map<String, Object> map() {
         Map<String, Object> map = new HashMap<>();
         String key = key();
+
+        carriage.next(); // jump the semicolon (:) character
+        carriage.clean(); // jump all "\r\n\t " after semicolon
+
+        if ("{[".contains(carriage.get().toString())) {
+            map.put(key, parse());
+        } else {
+            map.put(key, literal());
+        }
+
         return map;
+    }
+
+    private String literal() {
+        StringBuilder builder = new StringBuilder();
+
+        do {
+            builder.append(carriage.get());
+        } while (!("}],".contains(carriage.next().toString())));
+
+        return builder.toString();
     }
 
     String key() {
