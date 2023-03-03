@@ -28,15 +28,18 @@ public class Parser {
 
     private Map<String, Object> map() {
         Map<String, Object> map = new HashMap<>();
-        String key = key();
 
-        carriage.next(); // jump the semicolon (:) character
-        carriage.clean(); // jump all "\r\n\t " after semicolon
+        while (carriage.get() != '}') {
+            String key = key();
 
-        if ("{[".contains(carriage.get().toString())) {
-            map.put(key, parse());
-        } else {
-            map.put(key, literal());
+            carriage.next(); // jump the semicolon (:) character
+            carriage.clean(); // jump all "\r\n\t " after semicolon
+
+            if ("{[".contains(carriage.get().toString())) {
+                map.put(key, parse());
+            } else {
+                map.put(key, literal());
+            }
         }
 
         return map;
