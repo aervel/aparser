@@ -32,6 +32,11 @@ public final class Parser {
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ParseException, ClassNotFoundException, InstantiationException {
 
         if (object instanceof String value && type instanceof Class<?> cls) {
+
+            if (value.equals("null")) {
+                return null;
+            }
+
             if (Number.class.isAssignableFrom(cls)) {
                 return cls.getDeclaredMethod("valueOf", String.class).invoke(null, value);
             }
