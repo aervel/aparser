@@ -8,7 +8,7 @@ import java.util.*;
 
 import static java.util.Arrays.stream;
 
-public class Parser {
+public final class Parser {
     private final Carriage carriage;
 
     public Parser(Carriage carriage) {
@@ -34,6 +34,10 @@ public class Parser {
         if (object instanceof String value && type instanceof Class<?> cls) {
             if (Number.class.isAssignableFrom(cls)) {
                 return cls.getDeclaredMethod("valueOf", String.class).invoke(null, value);
+            }
+
+            if (Boolean.class.isAssignableFrom(cls)) {
+                return Boolean.valueOf(value);
             }
 
             value = value.substring(1, value.length() - 1); // cut ""
