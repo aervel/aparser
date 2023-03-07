@@ -1,5 +1,6 @@
 package aervel.aparser;
 
+import aervel.aparser.json.Parser;
 import aervel.aparser.json.Stringifier;
 
 public interface JSON {
@@ -15,6 +16,6 @@ public interface JSON {
     }
 
     static <T> T parse(String json, Class<T> type) {
-        return null;
+        return Parser.parse(json, type);
     }
 }
