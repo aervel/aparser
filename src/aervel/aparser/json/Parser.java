@@ -146,13 +146,16 @@ public final class Parser {
 
         while (carriage.get() != ']') {
 
-            carriage.next(); // skip the : or [ characters
-            carriage.clean(); // skip all "\r\n\t " after : or [ characters
+            // skip the : or [ characters and then verify if the current character is not the end of list ] character
+            // The purpose of verification is to avoid parsing wrong values when parsing an empty list
+            if (carriage.next() != ']') {
+                carriage.clean(); // skip all "\r\n\t " after : or [ characters
 
-            if ("{[".contains(carriage.get().toString())) {
-                list.add(parse());
-            } else {
-                list.add(literal());
+                if ("{[".contains(carriage.get().toString())) {
+                    list.add(parse());
+                } else {
+                    list.add(literal());
+                }
             }
         }
 
