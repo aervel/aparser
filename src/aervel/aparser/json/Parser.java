@@ -192,7 +192,17 @@ public class Parser {
             builder.append(carriage.get());
         } while (!("}],".contains(carriage.next().toString())));
 
-        return builder.toString().trim();
+        String literal = builder.toString().trim();
+
+        // When a literal has type "*,*" the loop above will break at comma (,), so to prevent return wrong values the
+        // if bellow verify the presence of comma at current carriage position and the reflected results in the literal
+        // variable. Continues the iteration through recursive call if the verification returned true.
+        if (literal.charAt(0) == '"' && carriage.get() == ',' && literal.charAt(literal.length() - 1) != '"') {
+            carriage.next(); // skip , at current position
+            return builder.append(',').append(literal()).toString();
+        }
+
+        return literal;
     }
 
     String key() {
