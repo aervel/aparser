@@ -31,6 +31,10 @@ public final class Parser {
     private Object parse(Object object, Type type)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ParseException, ClassNotFoundException, InstantiationException {
 
+        if (object == null) {
+            return null;
+        }
+
         if (object instanceof String value && type instanceof Class<?> cls) {
 
             if (value.equals("null")) {
@@ -176,15 +180,20 @@ public final class Parser {
                 carriage.next(); // skip { or , characters
             }
 
-            String key = key();
+            carriage.clean();
 
-            carriage.next(); // skip the : character
-            carriage.clean(); // skip all "\r\n\t " after : character
+            // The purpose of verification is to avoid parsing of empty objects
+            if (carriage.get() != '}') {
+                String key = key();
 
-            if ("{[".contains(carriage.get().toString())) {
-                map.put(key, parse());
-            } else {
-                map.put(key, literal());
+                carriage.next(); // skip the : character
+                carriage.clean(); // skip all "\r\n\t " after : character
+
+                if ("{[".contains(carriage.get().toString())) {
+                    map.put(key, parse());
+                } else {
+                    map.put(key, literal());
+                }
             }
         }
 
@@ -218,8 +227,6 @@ public final class Parser {
     }
 
     String key() {
-        carriage.clean();
-
         if (carriage.get() != '"') {
             throw new IllegalArgumentException(
                     "Unexpected token %s at position %d".formatted(carriage.get(), carriage.position())
