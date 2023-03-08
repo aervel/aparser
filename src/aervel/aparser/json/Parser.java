@@ -71,6 +71,8 @@ public final class Parser {
                     stream(fields).map(Field::getType).toArray(Class[]::new)
             );
 
+            constructor.setAccessible(true);
+
             Object[] arguments = new Object[fields.length];
 
             for (int i = 0; i < arguments.length; i++) {
@@ -221,6 +223,16 @@ public final class Parser {
         if (literal.charAt(0) == '"' && carriage.get() == ',' && literal.charAt(literal.length() - 1) != '"') {
             carriage.next(); // skip , at current position
             return builder.append(',').append(literal()).toString();
+        }
+
+        // When a literal hash type ""*",*" the loop above will break at (",), so to prevent return incomplete literal
+        // the if bellow verify the presence of comma at current carriage position and if true, clean and verify the
+        // next position for a valid control character. If absent, continues parsing the literal.
+        if (carriage.get() == ',') {
+            carriage.clean(); // skip all "\r\n\t " characters
+            if (!("}]\"".contains(carriage.get().toString()))) {
+                return builder.append(literal()).toString();
+            }
         }
 
         return literal;
