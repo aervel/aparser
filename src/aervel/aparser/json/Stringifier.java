@@ -46,14 +46,14 @@ public final class Stringifier {
          * The last return is for object represented with {} brackets in JSON. The return can be an empty JSON object
          * {}, but never a null object.
          */
-        return stream(object.getClass().getDeclaredFields()).filter(Stringifier::isValid)
+        return "{%s}".formatted(stream(object.getClass().getDeclaredFields()).filter(Stringifier::isValid)
                 .map(field -> {
                     try {
                         return "\"%s\":%s".formatted(field.getName(), stringify(field.get(object)));
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
-                }).collect(Collectors.joining(",")).formatted("{%s}");
+                }).collect(Collectors.joining(",")));
     }
 
     /**
