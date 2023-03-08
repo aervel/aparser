@@ -229,7 +229,10 @@ public final class Parser {
         // the if bellow verify the presence of comma at current carriage position and if true, clean and verify the
         // next position for a valid control character. If absent, continues parsing the literal.
         if (carriage.get() == ',') {
-            carriage.clean(); // skip all "\r\n\t " characters
+            do {
+                builder.append(carriage.get());
+            } while ("\n\t\r, ".contains(carriage.next().toString()) && carriage.hasNext());
+
             if (!("}]\"".contains(carriage.get().toString()))) {
                 return builder.append(literal()).toString();
             }
