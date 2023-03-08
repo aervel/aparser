@@ -213,9 +213,15 @@ public final class Parser {
 
         do {
             builder.append(carriage.get());
-        } while (!("}],".contains(carriage.next().toString())));
+        } while (!("}]:".contains(carriage.next().toString())));
 
         String literal = builder.toString().trim();
+
+        if (carriage.get() == ':') {
+            int index = literal.lastIndexOf(",", literal.length() - 2);
+            carriage.position(carriage.position() - (literal.length() - index));
+            return literal.substring(0, index);
+        }
 
         // When a literal has type "*,*" the loop above will break at comma (,), so to prevent return wrong values the
         // if bellow verify the presence of comma at current carriage position and the reflected results in the literal

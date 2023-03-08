@@ -33,4 +33,8 @@ final class Carriage implements Iterator<Character> {
             next();
         }
     }
+
+    public void position(int position) {
+        this.position = position;
+    }
 }
