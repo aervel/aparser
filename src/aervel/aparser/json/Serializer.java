@@ -2,6 +2,7 @@ package aervel.aparser.json;
 
 import aervel.aparser.Replacer;
 
+import java.lang.reflect.Field;
 import java.time.temporal.Temporal;
 import java.util.*;
 
@@ -43,13 +44,41 @@ public abstract class Serializer {
             }
 
             writer.write(']');
+
+            return writer;
         }
 
-        String packageName = object.getClass().getPackage() == null? "" : object.getClass().getPackageName();
+        String packageName = object.getClass().getPackage() == null ? "" : object.getClass().getPackageName();
 
         if (packageName.startsWith("java.") || packageName.startsWith("javax.")) {
-            serializeLiteral(object, writer);
+            return serializeLiteral(object, writer);
         }
+
+        Field[] fields = Fields.of(object.getClass());
+
+        writer.write('{');
+        int count = 0;
+
+        for (Field field: fields) {
+            try {
+                Map.Entry<String, Object> entry = replacer.apply(field.getName(), field.get(object));
+                if (entry != null) {
+
+                    if (count > 0) {
+                        writer.write(',');
+                    }
+
+                    serializeLiteral(entry.getKey(), writer);
+                    writer.write(':');
+                    serialize(entry.getValue(), replacer, writer);
+
+                    count++;
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        writer.write('}');
 
         return writer;
     }
