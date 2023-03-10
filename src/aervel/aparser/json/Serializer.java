@@ -49,6 +49,15 @@ public abstract class Serializer {
         return serialize(object, replacer0, writer);
     }
 
+    /**
+     * Serializes an object or array to its JSON representation.
+     * <p>
+     * If this object is a non-array type, all valid fields in object will be serialized and returned.
+     *
+     * @param object The object to be serialized. Can't be part of {@code java.*} package or {@code javax.*} package.
+     * @param writer The writer to write serialized data.
+     * @return This writer argument.
+     */
     private Writer serialize(Object object, Writer writer) {
         // Create a replacer instance that return the entries for all (key, value) in object
         Replacer replacer0 = (Map::entry);
