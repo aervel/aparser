@@ -8,6 +8,7 @@ import java.util.Date;
 
 
 public abstract class Serializer {
+
     private static final Serializer serializer = new Serializer() {
     };
 
@@ -63,7 +64,27 @@ public abstract class Serializer {
         return writer;
     }
 
+    /**
+     * Serializes an object indented as literal to its literal JSON representation format. Objects created from classes
+     * in {@code java.*} package or {@code javax.*} package are indented to be literals. Some examples of literals are:
+     * <ul>
+     *     <li>{@link  String}</li>
+     *     <li>{@link  Number}</li>
+     *     <li>{@link  Temporal}</li>
+     * </ul>
+     * <p>
+     * This method provides appropriate representation for each literal in JSON according to official documentation at
+     * <a href="https://www.json.org/json-en.html">json.org</a>.
+     * <p>
+     * If the object is null, null is written to writer. If the object is string and contains escape characters codes
+     * those characters are written to displayable string format. If the object is number, a number is written writer.
+     *
+     * @param object The object to be serialized. Must be part of {@code java.*} package or {@code javax.*} package.
+     * @param writer The writer to write serialized data.
+     * @return This writer argument.
+     */
     private Writer serializeLiteral(Object object, Writer writer) {
+
         if (object == null) {
             writer.write("null");
         }
