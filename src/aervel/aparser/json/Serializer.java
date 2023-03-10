@@ -2,9 +2,8 @@ package aervel.aparser.json;
 
 import aervel.aparser.Replacer;
 
-import java.lang.reflect.Field;
 import java.time.temporal.Temporal;
-import java.util.Date;
+import java.util.*;
 
 
 public abstract class Serializer {
@@ -25,41 +24,21 @@ public abstract class Serializer {
     }
 
     private Writer serialize(Object object, Replacer replacer, Writer writer) {
-        String packageName = object.getClass().getPackage() != null ? object.getClass().getPackageName() : "";
-
-        if (packageName.startsWith("java.") || packageName.startsWith("javax.")) {
-            return serializeLiteral(object, writer);
-        }
 
         return writer;
     }
 
+
     private Writer serialize(Object object, String[] replacer, Writer writer) {
-        String packageName = object.getClass().getPackage() != null ? object.getClass().getPackageName() : "";
-
-        if (packageName.startsWith("java.") || packageName.startsWith("javax.")) {
-            return serializeLiteral(object, writer);
-        }
-
-        Field[] fields = object.getClass().getDeclaredFields();
-
-        for (Field field : fields) {
-            try {
-                serialize(field.get(object), replacer, writer);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return writer;
+        // Use a Set because is most flexible to query for elements
+        Set<String> set = Set.of(replacer);
+        // Create a replacer instance that return the entries of keys in replacer array
+        Replacer replacer0 = ((key, value) -> set.contains(key) ? Map.entry(key, value) : null);
+        // Forward the responsibility of serialization to a method that uses an instance of Replacer
+        return serialize(object, replacer0, writer);
     }
 
     private Writer serialize(Object object, Writer writer) {
-        String packageName = object.getClass().getPackage() != null ? object.getClass().getPackageName() : "";
-
-        if (packageName.startsWith("java.") || packageName.startsWith("javax.")) {
-            return serializeLiteral(object, writer);
-        }
 
         return writer;
     }
