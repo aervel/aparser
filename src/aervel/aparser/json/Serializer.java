@@ -50,8 +50,10 @@ public abstract class Serializer {
     }
 
     private Writer serialize(Object object, Writer writer) {
-
-        return writer;
+        // Create a replacer instance that return the entries for all (key, value) in object
+        Replacer replacer0 = (Map::entry);
+        // Forward the responsibility of serialization to a method that uses an instance of Replacer
+        return serialize(object, replacer0, writer);
     }
 
     /**
