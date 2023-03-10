@@ -25,6 +25,32 @@ public abstract class Serializer {
 
     private Writer serialize(Object object, Replacer replacer, Writer writer) {
 
+        if (object instanceof Object[] objects) {
+            object = Arrays.asList(objects);
+        }
+
+        if (object instanceof Collection<?> collection) {
+            List<Object> list = new ArrayList<>(collection);
+
+            writer.write('[');
+
+            for (Object element : list) {
+                if (list.get(0) != element) {
+                    writer.write(',');
+                }
+
+                serialize(element, replacer, writer);
+            }
+
+            writer.write(']');
+        }
+
+        String packageName = object.getClass().getPackage() == null? "" : object.getClass().getPackageName();
+
+        if (packageName.startsWith("java.") || packageName.startsWith("javax.")) {
+            serializeLiteral(object, writer);
+        }
+
         return writer;
     }
 
