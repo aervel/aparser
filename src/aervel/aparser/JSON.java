@@ -1,17 +1,19 @@
 package aervel.aparser;
 
+import aervel.aparser.json.Serializer;
+
 public interface JSON {
 
     static String string(Object object, Replacer replacer) {
-        return null;
+        return Serializer.serialize(object, replacer);
     }
 
     static String string(Object object, String[] replacer) {
-        return null;
+        return Serializer.serialize(object, replacer);
     }
 
     static String string(Object object) {
-        return null;
+        return Serializer.serialize(object, null);
     }
 
     static <T> T object(String json, Class<T> type, Replacer replacer) {
