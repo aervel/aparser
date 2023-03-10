@@ -28,7 +28,18 @@ public abstract class Serializer {
         return writer;
     }
 
-
+    /**
+     * Serializes an object or array to its JSON representation.
+     * <p>
+     * If this object represents a non-array type, the replacer is used to determine which fields will be included and
+     * returned during the serialization process. All non-listed fields won't be included or returned in serialization
+     * process.
+     *
+     * @param object   The object to be serialized. Can't be part of {@code java.*} package or {@code javax.*} package.
+     * @param replacer An array of string containing the keys to be included in serialization process.
+     * @param writer   The writer to write serialized data.
+     * @return This writer argument.
+     */
     private Writer serialize(Object object, String[] replacer, Writer writer) {
         // Use a Set because is most flexible to query for elements
         Set<String> set = Set.of(replacer);
