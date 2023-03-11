@@ -63,8 +63,9 @@ public abstract class Serializer {
         writer.write('\n');
         int count = 0;
 
-        for (Field field: fields) {
+        for (Field field : fields) {
             try {
+                // throw a NullPointerException when field.get(object) return null
                 Map.Entry<String, Object> entry = replacer.apply(field.getName(), field.get(object));
                 if (entry != null) {
 
@@ -79,6 +80,9 @@ public abstract class Serializer {
 
                     count++;
                 }
+                // caused by Map.entry(k, v)
+            } catch (NullPointerException ignored) {
+
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -121,7 +125,7 @@ public abstract class Serializer {
      */
     private Writer serialize(Object object, Writer writer) {
         // Create a replacer instance that return the entries for all (key, value) in object
-        Replacer replacer0 = ((key, value) -> key == null || value == null? null: Map.entry(key, value));
+        Replacer replacer0 = (Map::entry);
         // Forward the responsibility of serialization to a method that uses an instance of Replacer
         return serialize(object, replacer0, writer);
     }
