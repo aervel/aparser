@@ -34,15 +34,18 @@ public abstract class Serializer {
             List<Object> list = new ArrayList<>(collection);
 
             writer.write('[');
+            writer.write('\n');
 
             for (Object element : list) {
                 if (list.get(0) != element) {
                     writer.write(',');
+                    writer.write('\n');
                 }
 
                 serialize(element, replacer, writer);
             }
 
+            writer.write('\n');
             writer.write(']');
 
             return writer;
@@ -57,6 +60,7 @@ public abstract class Serializer {
         Field[] fields = Fields.of(object.getClass());
 
         writer.write('{');
+        writer.write('\n');
         int count = 0;
 
         for (Field field: fields) {
@@ -66,6 +70,7 @@ public abstract class Serializer {
 
                     if (count > 0) {
                         writer.write(',');
+                        writer.write('\n');
                     }
 
                     serializeLiteral(entry.getKey(), writer);
@@ -78,6 +83,7 @@ public abstract class Serializer {
                 throw new RuntimeException(e);
             }
         }
+        writer.write('\n');
         writer.write('}');
 
         return writer;
@@ -115,7 +121,7 @@ public abstract class Serializer {
      */
     private Writer serialize(Object object, Writer writer) {
         // Create a replacer instance that return the entries for all (key, value) in object
-        Replacer replacer0 = (Map::entry);
+        Replacer replacer0 = ((key, value) -> key == null || value == null? null: Map.entry(key, value));
         // Forward the responsibility of serialization to a method that uses an instance of Replacer
         return serialize(object, replacer0, writer);
     }
