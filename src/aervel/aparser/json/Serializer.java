@@ -34,15 +34,18 @@ public abstract class Serializer {
             List<Object> list = new ArrayList<>(collection);
 
             writer.write('[');
+            writer.write('\n');
 
             for (Object element : list) {
                 if (list.get(0) != element) {
                     writer.write(',');
+                    writer.write('\n');
                 }
 
                 serialize(element, replacer, writer);
             }
 
+            writer.write('\n');
             writer.write(']');
 
             return writer;
@@ -57,15 +60,18 @@ public abstract class Serializer {
         Field[] fields = Fields.of(object.getClass());
 
         writer.write('{');
+        writer.write('\n');
         int count = 0;
 
-        for (Field field: fields) {
+        for (Field field : fields) {
             try {
+                // throw a NullPointerException when field.get(object) return null
                 Map.Entry<String, Object> entry = replacer.apply(field.getName(), field.get(object));
                 if (entry != null) {
 
                     if (count > 0) {
                         writer.write(',');
+                        writer.write('\n');
                     }
 
                     serializeLiteral(entry.getKey(), writer);
@@ -74,10 +80,14 @@ public abstract class Serializer {
 
                     count++;
                 }
+                // caused by Map.entry(k, v)
+            } catch (NullPointerException ignored) {
+
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
         }
+        writer.write('\n');
         writer.write('}');
 
         return writer;
