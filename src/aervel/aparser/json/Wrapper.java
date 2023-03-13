@@ -5,42 +5,56 @@ import java.util.Map;
 
 public class Wrapper {
 
+    @SuppressWarnings({"ResultOfMethodCallIgnored"})
     public static Object wrap(Reader reader) {
-        int read = reader.read();
+        reader.check('[', '{');
 
-        if (read == '{') {
+        if (reader.get() == '{') {
             Map<String, Object> map = new HashMap<>();
 
-            while (read != '}') {
-                String key = key(reader);
+            while (reader.get() != '}') {
+                reader.checkNext('"');
+                String key = string(reader);
 
-                if (reader.read() != ':') {
-                    throw new IllegalArgumentException();
+                reader.checkNext(':');
+                reader.checkNext('{', '[', '"', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+
+                switch (reader.get()) {
+                    case '{', '[' -> map.put(key, wrap(reader));
+                    case '"' -> map.put(key, string(reader));
+                    default -> map.put(key, number(reader));
                 }
 
-                read = reader.read();
-
-                if (read == '{' || read == '[') {
-                    map.put(key, wrap(reader));
-                }
+                if (reader.get() == '"') reader.skip(1);
             }
 
+            if (reader.get() == '}') reader.skip(1);
+
             return map;
+        } else {
+            return null;
         }
-
-        if (read == '[') {
-
-        }
-
-        throw new IllegalArgumentException();
     }
 
-    private static String key(Reader reader) {
+    private static String number(Reader reader) {
         StringBuilder builder = new StringBuilder();
 
-        if (reader.read() != '"') {
-            throw new IllegalArgumentException();
-        }
+        do {
+            int read = reader.get();
+
+            if (read == ',' || read == '}' || read == ']') {
+                break;
+            }
+
+            builder.append((char) read);
+
+        } while (reader.read() != -1);
+
+        return builder.toString().trim();
+    }
+
+    private static String string(Reader reader) {
+        StringBuilder builder = new StringBuilder();
 
         int read;
 
