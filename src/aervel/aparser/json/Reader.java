@@ -1,10 +1,11 @@
 package aervel.aparser.json;
 
 
+import java.io.IOException;
+
 public final class Reader extends java.io.Reader {
     private final StringBuffer buffer;
     private int column;
-    private int last;
     private int line;
 
     public Reader(String s) {
@@ -15,48 +16,16 @@ public final class Reader extends java.io.Reader {
     public int read() {
         int read = buffer.charAt(column++);
 
-        // resolve escaped special characters
-        if (read == '\\') {
-            switch (read()) {
-
-                case '"' -> {
-                    return '"';
-                }
-
-                case 'r' -> {
-                    return '\r';
-                }
-
-                case 't' -> {
-                    return '\t';
-                }
-
-                case 'f' -> {
-                    return '\f';
-                }
-
-                case 'n' -> {
-                    return '\n';
-                }
-
-                case '\\' -> {
-                    return '\\';
-                }
-
-                default -> throw new IllegalArgumentException();
-            }
-        }
-
         if (read == '\n') {
             line++;
         }
 
+        boolean skipSpace = read == '\r' || read == '\t' || read == '\f' || read == '\n';
+
         // skip escaped characters
-        while (read == '\r' || read == '\t' || read == '\f' || read == '\n') {
+        while ((skipSpace && read == ' ') || read == '\r' || read == '\t' || read == '\f' || read == '\n') {
             read = buffer.charAt(column++);
         }
-
-        last = read;
 
         return read;
     }
