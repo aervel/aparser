@@ -1,6 +1,8 @@
 package aervel.aparser.json;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Wrapper {
@@ -32,7 +34,23 @@ public class Wrapper {
 
             return map;
         } else {
-            return null;
+            List<Object> list = new ArrayList<>();
+
+            while (reader.get() != ']') {
+                reader.checkNext('{', '"', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+
+                switch (reader.get()) {
+                    case '{', '[' -> list.add(wrap(reader));
+                    case '"' -> list.add(string(reader));
+                    default -> list.add(number(reader));
+                }
+
+                if (reader.get() == '"') reader.skip(1);
+            }
+
+            if (reader.get() == ']') reader.skip(1);
+
+            return list;
         }
     }
 
