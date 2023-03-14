@@ -36,13 +36,23 @@ public abstract class Serializer {
             writer.write('[');
             writer.write('\n');
 
-            for (Object element : list) {
-                if (list.get(0) != element) {
-                    writer.write(',');
-                    writer.write('\n');
-                }
+            int count = 0;
 
-                serialize(element, replacer, writer);
+            for (Object element : list) {
+                try {
+                    Writer w = new Writer();
+
+                    if (count > 0) {
+                        w.write(',');
+                        w.write('\n');
+                    }
+
+                    serialize(element, replacer, w);
+                    writer.write(w.toString());
+                    count++;
+                } catch (Break ignored) {
+
+                }
             }
 
             writer.write('\n');
