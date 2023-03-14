@@ -2,6 +2,7 @@ package aervel.aparser.json;
 
 import aervel.aparser.Replacer;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -26,14 +27,22 @@ public abstract class Deserializer {
     }
 
     private <T> T deserialize(Object object, Class<T> type, Replacer replacer) {
-        String packageName = type.getPackage() == null ? "" : type.getPackageName();
-
-        if (packageName.startsWith("java.") || packageName.startsWith("javax.")) {
-            return deserializeLiteral((String) object, type);
-        }
 
         if (object instanceof List<?> list && type.isArray()) {
             Class<?> componentType = type.getComponentType();
+            Object array = Array.newInstance(componentType, list.size());
+
+            for (int i = 0; i < list.size(); i++) {
+                Array.set(array, i, deserialize(list.get(i), componentType, replacer));
+            }
+
+            return (T) array;
+        }
+
+        String packageName = type.getPackage() == null ? "" : type.getPackageName();
+
+        if (packageName.startsWith("java.") || packageName.startsWith("javax.") || type.getClassLoader() == null) {
+            return deserializeLiteral((String) object, type);
         }
 
         if (object instanceof Map<?, ?> map) {
