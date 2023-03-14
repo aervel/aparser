@@ -42,7 +42,11 @@ public abstract class Deserializer {
         String packageName = type.getPackage() == null ? "" : type.getPackageName();
 
         if (packageName.startsWith("java.") || packageName.startsWith("javax.") || type.getClassLoader() == null) {
-            return deserializeLiteral((String) object, type);
+            if (object instanceof String string) {
+                return deserializeLiteral(string, type);
+            }
+
+            throw new IllegalArgumentException();
         }
 
         if (object instanceof Map<?, ?> map) {
