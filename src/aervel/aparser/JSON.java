@@ -1,5 +1,6 @@
 package aervel.aparser;
 
+import aervel.aparser.json.Deserializer;
 import aervel.aparser.json.Serializer;
 
 public interface JSON {
@@ -17,14 +18,14 @@ public interface JSON {
     }
 
     static <T> T object(String json, Class<T> type, Replacer replacer) {
-        return null;
+        return Deserializer.deserialize(json, type, replacer);
     }
 
     static <T> T object(String json, Class<T> type, String[] replacer) {
-        return null;
+        return Deserializer.deserialize(json, type, replacer);
     }
 
     static <T> T object(String json, Class<T> type) {
-        return null;
+        return Deserializer.deserialize(json, type, null);
     }
 }
