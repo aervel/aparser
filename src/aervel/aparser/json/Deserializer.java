@@ -138,6 +138,16 @@ public abstract class Deserializer {
         return deserialize(wrap, type, replacer0);
     }
 
+    /**
+     * Converts a literal string to an object of class in {@code java.*} or {@code javax.*} packages created from this
+     * type argument. If the class type represents a primitive value before deserialization is converted to it's class
+     * wrap, so the value returned, is not primitive, is wrapped through the auto boxing of Java.
+     *
+     * @param object The object to be deserialized. Must be a String.
+     * @param type   The type of object to return after deserialization. Is the type to deserialize to.
+     * @param <T>    The generic type of object to return.
+     * @return An object of class represented by type argument deserialized from string of object argument.
+     */
     @SuppressWarnings("unchecked")
     private <T> T deserializeLiteral(String object, Class<?> type) {
         try {
@@ -152,33 +162,46 @@ public abstract class Deserializer {
                 else if (type.equals(boolean.class)) type = Boolean.class;
             }
 
+            // catches only objects without non-specified type. Examples: List<Object>, Set<Object>, Object[]
+            // the component type in these types are from objects, so the type can be anything, so the object itself is
+            // returned. The next feature, will be able to try to convert the string object to its near representation
+            // class type.
             if (Object.class.equals(type)) {
                 return (T) object;
             }
 
+            // catches only date types
             if (Date.class.isAssignableFrom(type)) {
                 return (T) DateFormat.getInstance().parse(object);
             }
 
-            if (String.class.isAssignableFrom(type)) {
-                return (T) object;
+            // catches all character sequences from package java.lang
+            if (CharSequence.class.isAssignableFrom(type)) {
+                if (type.isInterface()) {
+                    return (T) object;
+                }
+
+                return (T) type.getDeclaredConstructor(String.class).newInstance(object);
             }
 
+            // catches all temporal values from package java.time
             if (Temporal.class.isAssignableFrom(type)) {
                 return (T) type.getDeclaredMethod("parse", CharSequence.class).invoke(null, object);
             }
 
+            // catches characters
             if (Character.class.isAssignableFrom(type)) {
                 return (T) Character.valueOf(object.charAt(0));
             }
 
+            // catches all numeric or boolean values
             if (Number.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type)) {
                 return (T) type.getDeclaredMethod("valueOf", String.class).invoke(null, object);
             }
 
             throw new IllegalArgumentException();
-
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ParseException e) {
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ParseException |
+                 InstantiationException e) {
             throw new RuntimeException(e);
         }
     }
