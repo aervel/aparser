@@ -131,7 +131,17 @@ public abstract class Deserializer {
         return deserialize(object, type, replacer0);
     }
 
-
+    /**
+     * Deserializes an object to its correspondent Java object of class represented by type parameter.
+     * <p>
+     * This method creates a default replacer to use one forwarding the responsibility of deserialization. The default
+     * replacer don't perform a special task, only wrap the key-value properties in a {@link Map.Entry entry}.
+     *
+     * @param object The object to be deserialized.
+     * @param type   The type of object to return after deserialization. Is the type to deserialize to.
+     * @param <T>    The generic type of object to return.
+     * @return An object of class represented by type argument deserialized from string of object argument.
+     */
     private <T> T deserialize(Object object, Class<T> type) {
         // Create a replacer instance that return the entries for all (key, value) in object
         Replacer replacer0 = (Map::entry);
