@@ -122,6 +122,17 @@ public abstract class Deserializer {
         }
     }
 
+    /**
+     * Deserializes an object to its correspondent Java object of class represented by type parameter.  Uses a replacer
+     * to determine which keys to include in deserialization process. If a key is not specified its correspondent field
+     * is assigned to null.
+     *
+     * @param object   The object to be deserialized.
+     * @param type     The type of object to return after deserialization. Is the type to deserialize to.
+     * @param replacer An array of string containing the keys to be included in deserialization process.
+     * @param <T>      The generic type of object to return.
+     * @return An object of class represented by type argument deserialized from string of object argument.
+     */
     private <T> T deserialize(Object object, Class<T> type, String[] replacer) {
         // Use a Set because is most flexible to query for elements
         Set<String> set = Set.of(replacer);
