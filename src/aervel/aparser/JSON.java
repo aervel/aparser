@@ -9,7 +9,7 @@ public interface JSON {
         return Serializer.serialize(object, replacer);
     }
 
-    static String string(Object object, String...replacer) {
+    static String string(Object object, String... replacer) {
         return Serializer.serialize(object, replacer);
     }
 
@@ -21,7 +21,7 @@ public interface JSON {
         return Deserializer.deserialize(json, type, replacer);
     }
 
-    static <T> T object(String json, Class<T> type, String[] replacer) {
+    static <T> T object(String json, Class<T> type, String... replacer) {
         return Deserializer.deserialize(json, type, replacer);
     }
 
