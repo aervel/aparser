@@ -122,20 +122,21 @@ public abstract class Deserializer {
         }
     }
 
-    private <T> T deserialize(Object wrap, Class<T> type, String[] replacer) {
+    private <T> T deserialize(Object object, Class<T> type, String[] replacer) {
         // Use a Set because is most flexible to query for elements
         Set<String> set = Set.of(replacer);
         // Create a replacer instance that return the entries of keys in replacer array
         Replacer replacer0 = ((key, value) -> set.contains(key) ? Map.entry(key, value) : null);
         // Forward the responsibility of deserialization to a method that uses an instance of Replacer
-        return deserialize(wrap, type, replacer0);
+        return deserialize(object, type, replacer0);
     }
 
-    private <T> T deserialize(Object wrap, Class<T> type) {
+
+    private <T> T deserialize(Object object, Class<T> type) {
         // Create a replacer instance that return the entries for all (key, value) in object
         Replacer replacer0 = (Map::entry);
         // Forward the responsibility of deserialization to a method that uses an instance of Replacer
-        return deserialize(wrap, type, replacer0);
+        return deserialize(object, type, replacer0);
     }
 
     /**
