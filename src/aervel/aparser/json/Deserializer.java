@@ -2,8 +2,7 @@ package aervel.aparser.json;
 
 import aervel.aparser.Replacer;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.time.temporal.Temporal;
@@ -26,34 +25,75 @@ public abstract class Deserializer {
         return deserializer.deserialize(Wrapper.wrap(new Reader(json)), type);
     }
 
-    private <T> T deserialize(Object object, Class<T> type, Replacer replacer) {
+    @SuppressWarnings("unchecked")
+    private <T> T deserialize(Object object, Type type, Replacer replacer) {
 
-        if (object instanceof List<?> list && type.isArray()) {
-            Class<?> componentType = type.getComponentType();
-            Object array = Array.newInstance(componentType, list.size());
-
-            for (int i = 0; i < list.size(); i++) {
-                Array.set(array, i, deserialize(list.get(i), componentType, replacer));
+        try {
+            if (!(type instanceof Class<?> || type instanceof ParameterizedType)) {
+                throw new IllegalArgumentException();
             }
 
-            return (T) array;
-        }
+            Class<T> cls = (Class<T>) (type instanceof Class<?> ? type : Class.forName(type.getTypeName().split("<")[0]));
 
-        String packageName = type.getPackage() == null ? "" : type.getPackageName();
+            if (object instanceof List<?> list && cls.isArray()) {
+                Class<?> componentType = cls.getComponentType();
+                Object array = Array.newInstance(componentType, list.size());
 
-        if (packageName.startsWith("java.") || packageName.startsWith("javax.") || type.getClassLoader() == null) {
-            if (object instanceof String string) {
-                return deserializeLiteral(string, type);
+                for (int i = 0; i < list.size(); i++) {
+                    Array.set(array, i, deserialize(list.get(i), componentType, replacer));
+                }
+
+                return (T) array;
+            }
+
+            if (object instanceof List<?> list && Collection.class.isAssignableFrom(cls)) {
+
+                if (type instanceof ParameterizedType parameterizedType) {
+                    Type componentType = parameterizedType.getActualTypeArguments()[0];
+                    Collection<?> collection = new ArrayList<>();
+
+                    for (Object o : list) {
+                        collection.add(deserialize(o, componentType, replacer));
+                    }
+
+                    if (cls.isInterface()) {
+                        return (T) cls.getDeclaredMethod("copyOf", Collection.class).invoke(null, collection);
+                    }
+
+                    return cls.getDeclaredConstructor(Collection.class).newInstance(collection);
+                }
+
+                return (T) list;
+            }
+
+            String packageName = cls.getPackage() == null ? "" : cls.getPackageName();
+
+            if (packageName.startsWith("java.") || packageName.startsWith("javax.") || cls.getClassLoader() == null) {
+
+                if (object instanceof String string) {
+                    return deserializeLiteral(string, cls);
+                }
+
+                throw new IllegalArgumentException();
+            }
+
+            if (object instanceof Map<?, ?> map) {
+                Field[] fields = Fields.of(cls);
+                Object[] arguments = new Object[fields.length];
+                Constructor<T> constructor = Constructors.of(fields);
+
+                for (int i = 0; i < arguments.length; i++) {
+                    arguments[i] = deserialize(map.get(fields[i].getName()), fields[i].getGenericType(), replacer);
+                }
+
+                return constructor.newInstance(arguments);
             }
 
             throw new IllegalArgumentException();
+        } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
+                 NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
-
-        if (object instanceof Map<?, ?> map) {
-
-        }
-
-        throw new IllegalArgumentException();
     }
 
     private <T> T deserialize(Object wrap, Class<T> type, String[] replacer) {
