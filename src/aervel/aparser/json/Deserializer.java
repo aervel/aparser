@@ -77,13 +77,36 @@ public abstract class Deserializer {
                 throw new IllegalArgumentException();
             }
 
-            if (object instanceof Map<?, ?> map) {
+            if (object instanceof Map<?, ?>) {
                 Field[] fields = Fields.of(cls);
                 Object[] arguments = new Object[fields.length];
                 Constructor<T> constructor = Constructors.of(fields);
 
+                Map<String, Object> map = new HashMap<>();
+
+                ((Map<String, Object>) object).forEach((key, value) -> {
+                    if (Arrays.stream(fields).noneMatch(field -> field.getName().equals(key))) {
+                        Map.Entry<String, Object> entry = replacer.apply(key, value);
+
+                        if (entry != null) {
+                            map.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                });
+
                 for (int i = 0; i < arguments.length; i++) {
-                    arguments[i] = deserialize(map.get(fields[i].getName()), fields[i].getGenericType(), replacer);
+                    String key = fields[i].getName();
+
+                    if (!map.containsKey(fields[i].getName())) {
+                        Object value = deserialize(((Map<?, ?>)object).get(key), fields[i].getGenericType(), replacer);
+                        Map.Entry<String, Object> entry = replacer.apply(key, value);
+
+                        if (entry != null) {
+                            arguments[i] = entry.getValue();
+                        }
+                    } else {
+                        arguments[i] = deserialize(map.get(key), fields[i].getGenericType(), replacer);
+                    }
                 }
 
                 return constructor.newInstance(arguments);
