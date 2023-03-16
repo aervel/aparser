@@ -27,6 +27,9 @@ public abstract class Deserializer {
 
     @SuppressWarnings("unchecked")
     private <T> T deserialize(Object object, Type type, Replacer replacer) {
+        if (object == null) {
+            return null;
+        }
 
         try {
             if (!(type instanceof Class<?> || type instanceof ParameterizedType)) {
@@ -74,7 +77,7 @@ public abstract class Deserializer {
                     return deserializeLiteral(string, cls);
                 }
 
-                throw new IllegalArgumentException();
+                return (T) object;
             }
 
             if (object instanceof Map<?, ?>) {
@@ -98,7 +101,7 @@ public abstract class Deserializer {
                     String key = fields[i].getName();
 
                     if (!map.containsKey(fields[i].getName())) {
-                        Object value = deserialize(((Map<?, ?>)object).get(key), fields[i].getGenericType(), replacer);
+                        Object value = deserialize(((Map<?, ?>) object).get(key), fields[i].getGenericType(), replacer);
                         Map.Entry<String, Object> entry = replacer.apply(key, value);
 
                         if (entry != null) {
