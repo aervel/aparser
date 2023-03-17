@@ -6,6 +6,9 @@ import java.util.Arrays;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
 
+/**
+ * Provide a set of methods to work with fields.
+ */
 public abstract class Fields {
 
     public static boolean isValid(Field field) {
