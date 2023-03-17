@@ -9,11 +9,16 @@ public abstract class Literal {
     private static final Literal literal = new Literal() {
     };
 
+    @SuppressWarnings("unchecked")
     public static <T> T of(String object) {
         return (T) literal.create(object);
     }
 
     private Object create(String value) {
+        if (value == null) {
+            return null;
+        }
+
         if (isNumber(value)) {
             if (value.contains(".")) {
                 return Double.parseDouble(value);
