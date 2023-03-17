@@ -37,7 +37,7 @@ public class Wrapper {
             List<Object> list = new ArrayList<>();
 
             while (reader.get() != ']') {
-                reader.checkNext('{', ']', '[', '"', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+                reader.checkNext('{', ']', '[', '"', '-', '+', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
 
                 switch (reader.get()) {
                     case '{', '[' -> list.add(wrap(reader));
@@ -62,6 +62,12 @@ public class Wrapper {
 
             if (read == ',' || read == '}' || read == ']') {
                 break;
+            }
+
+            if (!builder.isEmpty()) {
+                reader.check( '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+            }else {
+                reader.check( '+', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
             }
 
             builder.append((char) read);
