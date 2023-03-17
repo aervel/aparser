@@ -12,6 +12,24 @@ public final class Reader extends java.io.Reader {
         buffer = new StringBuffer(s);
     }
 
+    /**
+     * Read a single character in a stream of chars and return its codepoint or -1 if the end of stream is reached.
+     * <p>
+     * The following characters (indentation characters or formatting characters) are skipped in specific conditions:
+     * <ul>
+     *     <li>Carriage return {@code '\r'}</li>
+     *     <li>Tabulation {@code '\t'}</li>
+     *     <li>Line fee {@code '\f'}</li>
+     *     <li>New line {@code '\n'}</li>
+     *     <li>Space {@code ' '}</li>
+     * </ul>
+     * If the current character represents one of formatting characters excluding space, will be skipped and following
+     * spaces to. If current character represents space only but not preceded by another formatting character, then it
+     * is returned.
+     *
+     * @return The character read, as an integer in the range 0 to 65535 (0x00-0xffff), or -1 if the end of the stream
+     * has been reached.
+     */
     @Override
     public int read() {
 
@@ -78,7 +96,7 @@ public final class Reader extends java.io.Reader {
         return buffer.charAt(position > 0 ? position - 1 : position);
     }
 
-    public void checkNext(char...chars) throws IllegalArgumentException {
+    public void checkNext(char... chars) throws IllegalArgumentException {
         read();
         check(chars);
     }

@@ -25,8 +25,22 @@ public abstract class Deserializer {
         return deserializer.deserialize(Wrapper.wrap(new Reader(json)), type);
     }
 
+    /**
+     * Deserializes an object to its correspondent Java object of class represented by type parameter. Receives a type
+     * parameter which must be an instance of {@link ParameterizedType} for generics or {@link Class} to regular class.
+     * If the object is null, null is returned.
+     *
+     * @param object   The object to be deserialized.
+     * @param type     The type of object to return after deserialization. Is the type to deserialize to.
+     * @param replacer An instance of Replacer. Can not be null.
+     * @param <T>      The generic type of object to return.
+     * @return An object of class represented by type argument deserialized from string of object argument.
+     */
     @SuppressWarnings("unchecked")
     private <T> T deserialize(Object object, Type type, Replacer replacer) {
+        if (object == null) {
+            return null;
+        }
 
         try {
             if (!(type instanceof Class<?> || type instanceof ParameterizedType)) {
@@ -74,16 +88,39 @@ public abstract class Deserializer {
                     return deserializeLiteral(string, cls);
                 }
 
-                throw new IllegalArgumentException();
+                return (T) object;
             }
 
-            if (object instanceof Map<?, ?> map) {
+            if (object instanceof Map<?, ?>) {
                 Field[] fields = Fields.of(cls);
                 Object[] arguments = new Object[fields.length];
                 Constructor<T> constructor = Constructors.of(fields);
 
+                Map<String, Object> map = new HashMap<>();
+
+                ((Map<String, Object>) object).forEach((key, value) -> {
+                    if (Arrays.stream(fields).noneMatch(field -> field.getName().equals(key))) {
+                        Map.Entry<String, Object> entry = replacer.apply(key, value);
+
+                        if (entry != null) {
+                            map.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                });
+
                 for (int i = 0; i < arguments.length; i++) {
-                    arguments[i] = deserialize(map.get(fields[i].getName()), fields[i].getGenericType(), replacer);
+                    String key = fields[i].getName();
+
+                    if (!map.containsKey(fields[i].getName())) {
+                        Object value = deserialize(((Map<?, ?>) object).get(key), fields[i].getGenericType(), replacer);
+                        Map.Entry<String, Object> entry = replacer.apply(key, value);
+
+                        if (entry != null) {
+                            arguments[i] = entry.getValue();
+                        }
+                    } else {
+                        arguments[i] = deserialize(map.get(key), fields[i].getGenericType(), replacer);
+                    }
                 }
 
                 return constructor.newInstance(arguments);
@@ -96,22 +133,54 @@ public abstract class Deserializer {
         }
     }
 
-    private <T> T deserialize(Object wrap, Class<T> type, String[] replacer) {
+    /**
+     * Deserializes an object to its correspondent Java object of class represented by type parameter.  Uses a replacer
+     * to determine which keys to include in deserialization process. If a key is not specified its correspondent field
+     * is assigned to null.
+     *
+     * @param object   The object to be deserialized.
+     * @param type     The type of object to return after deserialization. Is the type to deserialize to.
+     * @param replacer An array of string containing the keys to be included in deserialization process.
+     * @param <T>      The generic type of object to return.
+     * @return An object of class represented by type argument deserialized from string of object argument.
+     */
+    private <T> T deserialize(Object object, Class<T> type, String[] replacer) {
         // Use a Set because is most flexible to query for elements
         Set<String> set = Set.of(replacer);
         // Create a replacer instance that return the entries of keys in replacer array
         Replacer replacer0 = ((key, value) -> set.contains(key) ? Map.entry(key, value) : null);
         // Forward the responsibility of deserialization to a method that uses an instance of Replacer
-        return deserialize(wrap, type, replacer0);
+        return deserialize(object, type, replacer0);
     }
 
-    private <T> T deserialize(Object wrap, Class<T> type) {
+    /**
+     * Deserializes an object to its correspondent Java object of class represented by type parameter.
+     * <p>
+     * This method creates a default replacer to use one forwarding the responsibility of deserialization. The default
+     * replacer don't perform a special task, only wrap the key-value properties in a {@link Map.Entry entry}.
+     *
+     * @param object The object to be deserialized.
+     * @param type   The type of object to return after deserialization. Is the type to deserialize to.
+     * @param <T>    The generic type of object to return.
+     * @return An object of class represented by type argument deserialized from string of object argument.
+     */
+    private <T> T deserialize(Object object, Class<T> type) {
         // Create a replacer instance that return the entries for all (key, value) in object
         Replacer replacer0 = (Map::entry);
         // Forward the responsibility of deserialization to a method that uses an instance of Replacer
-        return deserialize(wrap, type, replacer0);
+        return deserialize(object, type, replacer0);
     }
 
+    /**
+     * Converts a literal string to an object of class in {@code java.*} or {@code javax.*} packages created from this
+     * type argument. If the class type represents a primitive value before deserialization is converted to it's class
+     * wrap, so the value returned, is not primitive, is wrapped through the auto boxing of Java.
+     *
+     * @param object The object to be deserialized. Must be a String.
+     * @param type   The type of object to return after deserialization. Is the type to deserialize to.
+     * @param <T>    The generic type of object to return.
+     * @return An object of class represented by type argument deserialized from string of object argument.
+     */
     @SuppressWarnings("unchecked")
     private <T> T deserializeLiteral(String object, Class<?> type) {
         try {
@@ -126,33 +195,46 @@ public abstract class Deserializer {
                 else if (type.equals(boolean.class)) type = Boolean.class;
             }
 
+            // catches only objects without non-specified type. Examples: List<Object>, Set<Object>, Object[]
+            // the component type in these types are from objects, so the type can be anything, so the object itself is
+            // returned. The next feature, will be able to try to convert the string object to its near representation
+            // class type.
             if (Object.class.equals(type)) {
                 return (T) object;
             }
 
+            // catches only date types
             if (Date.class.isAssignableFrom(type)) {
                 return (T) DateFormat.getInstance().parse(object);
             }
 
-            if (String.class.isAssignableFrom(type)) {
-                return (T) object;
+            // catches all character sequences from package java.lang
+            if (CharSequence.class.isAssignableFrom(type)) {
+                if (type.isInterface()) {
+                    return (T) object;
+                }
+
+                return (T) type.getDeclaredConstructor(String.class).newInstance(object);
             }
 
+            // catches all temporal values from package java.time
             if (Temporal.class.isAssignableFrom(type)) {
                 return (T) type.getDeclaredMethod("parse", CharSequence.class).invoke(null, object);
             }
 
+            // catches characters
             if (Character.class.isAssignableFrom(type)) {
                 return (T) Character.valueOf(object.charAt(0));
             }
 
+            // catches all numeric or boolean values
             if (Number.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type)) {
                 return (T) type.getDeclaredMethod("valueOf", String.class).invoke(null, object);
             }
 
             throw new IllegalArgumentException();
-
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ParseException e) {
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ParseException |
+                 InstantiationException e) {
             throw new RuntimeException(e);
         }
     }
