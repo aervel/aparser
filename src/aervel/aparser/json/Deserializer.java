@@ -25,6 +25,17 @@ public abstract class Deserializer {
         return deserializer.deserialize(Wrapper.wrap(new Reader(json)), type);
     }
 
+    /**
+     * Deserializes an object to its correspondent Java object of class represented by type parameter. Receives a type
+     * parameter which must be an instance of {@link ParameterizedType} for generics or {@link Class} to regular class.
+     * If the object is null, null is returned.
+     *
+     * @param object   The object to be deserialized.
+     * @param type     The type of object to return after deserialization. Is the type to deserialize to.
+     * @param replacer An instance of Replacer. Can not be null.
+     * @param <T>      The generic type of object to return.
+     * @return An object of class represented by type argument deserialized from string of object argument.
+     */
     @SuppressWarnings("unchecked")
     private <T> T deserialize(Object object, Type type, Replacer replacer) {
         if (object == null) {
