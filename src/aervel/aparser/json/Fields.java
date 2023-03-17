@@ -11,6 +11,18 @@ import static java.lang.reflect.Modifier.isTransient;
  */
 public abstract class Fields {
 
+    /**
+     * Returns true if the field is valid or false otherwise. A field is valid if:
+     * <ul>
+     *     <li>Is not static</li>
+     *     <li>Is not transient</li>
+     *     <li>Is accessible for reflection</li>
+     * </ul>
+     * If at least one of those conditions are false the field is considered not valid.
+     *
+     * @param field The field to be validated.
+     * @return True if the field is valid or false otherwise.
+     */
     public static boolean isValid(Field field) {
         return !(isStatic(field.getModifiers()) || isTransient(field.getModifiers())) && field.trySetAccessible();
     }
