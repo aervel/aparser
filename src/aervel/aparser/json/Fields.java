@@ -9,7 +9,7 @@ import static java.lang.reflect.Modifier.isTransient;
 /**
  * Provide a set of methods to work with fields.
  */
-public abstract class Fields {
+abstract class Fields {
 
     /**
      * Returns true if the field is valid or false otherwise. A field is valid if:

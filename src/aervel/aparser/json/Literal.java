@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public abstract class Literal {
+abstract class Literal {
 
     private static final Literal literal = new Literal() {
     };

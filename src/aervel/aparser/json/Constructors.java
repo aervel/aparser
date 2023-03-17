@@ -9,7 +9,7 @@ import java.util.Arrays;
  *
  * @author Djafta
  */
-public class Constructors {
+abstract class Constructors {
 
     /**
      * Uses the fields from same class to create and return a constructor. The returned constructor has the same type

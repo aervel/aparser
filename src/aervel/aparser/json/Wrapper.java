@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Wrapper {
+final class Wrapper {
 
     @SuppressWarnings({"ResultOfMethodCallIgnored"})
     public static Object wrap(Reader reader) {
