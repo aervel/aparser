@@ -1,13 +1,34 @@
 package aervel.aparser.json;
 
 public abstract class Literal {
-    private static final Literal literal = new Literal(){};
+
+    private static final Literal literal = new Literal() {
+    };
 
     public static <T> T of(String object) {
-        return literal.create(object);
+        return (T) literal.create(object);
     }
 
-    private <T> T create(String object) {
+    private Object create(String value) {
+        if (isNumber(value)) {
+
+            if (value.contains(".")) {
+                return Double.parseDouble(value);
+            } else {
+                if (value.length() < 10) {
+                    return Integer.parseInt(value);
+                }
+
+                long number = Long.parseLong(value);
+
+                if (number < Integer.MAX_VALUE) {
+                    return (int) number;
+                }
+
+                return number;
+            }
+        }
+
         return null;
     }
 
