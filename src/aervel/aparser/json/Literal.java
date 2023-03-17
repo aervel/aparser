@@ -11,4 +11,22 @@ public abstract class Literal {
         return null;
     }
 
+    public boolean isNumber(String value) {
+        char[] chars = value.toCharArray();
+        boolean comma = false;
+
+        for (char c : chars) {
+            if (c == 46) {
+                if (comma) {
+                    return false;
+                } else {
+                    comma = true;
+                }
+            } else if (c < 48 || c > 57) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
