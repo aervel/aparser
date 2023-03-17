@@ -4,6 +4,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
+/**
+ * Provide a set of methods to work with constructors of class.
+ *
+ * @author Djafta
+ */
 public class Constructors {
 
     /**
