@@ -36,14 +36,18 @@ public abstract class Literal {
         char[] chars = value.toCharArray();
         boolean comma = false;
 
+        if (chars[0] == '-' || chars[0] == '+') {
+            chars[0] = '0';
+        }
+
         for (char c : chars) {
-            if (c == 46) {
+            if (c == '.') {
                 if (comma) {
                     return false;
                 } else {
                     comma = true;
                 }
-            } else if (c < 48 || c > 57) {
+            } else if (c < '0' || c > '9') {
                 return false;
             }
         }
