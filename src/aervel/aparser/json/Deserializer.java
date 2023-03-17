@@ -200,7 +200,7 @@ public abstract class Deserializer {
             // returned. The next feature, will be able to try to convert the string object to its near representation
             // class type.
             if (Object.class.equals(type)) {
-                return (T) object;
+                return Literal.of(object);
             }
 
             // catches only date types
