@@ -28,7 +28,12 @@ public abstract class Fields {
         return !(isStatic(field.getModifiers()) || isTransient(field.getModifiers())) && field.trySetAccessible();
     }
 
-
+    /**
+     * Get declared fields from class given as parameter and those who are valid in array.
+     *
+     * @param cls The declaring class of expected fields.
+     * @return An array of valid Field's extracted from cls.
+     */
     public static Field[] of(Class<?> cls) {
         return Arrays.stream(cls.getDeclaredFields()).filter(Fields::isValid).toArray(Field[]::new);
     }
