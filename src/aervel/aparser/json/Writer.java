@@ -8,6 +8,11 @@ final class Writer extends java.io.Writer {
 
     @Override
     public void write(int c) {
+
+        if (c == '\t') {
+            return;
+        }
+
         if (c == '\n' && (last == '{' || last == '[')) {
             tabs++;
         }
