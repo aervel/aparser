@@ -1,6 +1,6 @@
 package aervel.aparser.json;
 
-public final class Writer extends java.io.Writer {
+final class Writer extends java.io.Writer {
     private final StringBuffer buffer = new StringBuffer();
     private int tabs;
     private int last;
@@ -8,6 +8,11 @@ public final class Writer extends java.io.Writer {
 
     @Override
     public void write(int c) {
+
+        if (c == '\t') {
+            return;
+        }
+
         if (c == '\n' && (last == '{' || last == '[')) {
             tabs++;
         }

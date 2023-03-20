@@ -100,7 +100,13 @@ public abstract class Deserializer {
 
                 ((Map<String, Object>) object).forEach((key, value) -> {
                     if (Arrays.stream(fields).noneMatch(field -> field.getName().equals(key))) {
-                        Map.Entry<String, Object> entry = replacer.apply(key, value);
+                        Map.Entry<String, Object> entry;
+
+                        if (value instanceof String string) {
+                            entry = replacer.apply(key, deserializeLiteral(string, Object.class));
+                        } else {
+                            entry = replacer.apply(key, value);
+                        }
 
                         if (entry != null) {
                             map.put(entry.getKey(), entry.getValue());
@@ -200,7 +206,7 @@ public abstract class Deserializer {
             // returned. The next feature, will be able to try to convert the string object to its near representation
             // class type.
             if (Object.class.equals(type)) {
-                return (T) object;
+                return Literal.of(object);
             }
 
             // catches only date types

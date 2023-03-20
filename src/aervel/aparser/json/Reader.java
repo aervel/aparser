@@ -3,7 +3,7 @@ package aervel.aparser.json;
 
 import java.io.IOException;
 
-public final class Reader extends java.io.Reader {
+final class Reader extends java.io.Reader {
     private final StringBuffer buffer;
     private int position = 0;
     private int[] location = {0, 1};
